@@ -1,14 +1,22 @@
 name: brew pr-pull
+
 on:
   pull_request_target:
     types:
       - labeled
-env:
-  HOMEBREW_NO_INSTALL_FROM_API: "1"
+
 permissions:
   actions: read
   contents: write
   pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+env:
+  HOMEBREW_NO_INSTALL_FROM_API: "1"
+
 jobs:
   pr-pull:
     if: contains(github.event.pull_request.labels.*.name, 'pr-pull')
@@ -54,4 +62,8 @@ jobs:
       - name: Merge PR
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr merge --delete-branch --merge '${{ github.event.pull_request.number }}'
+        run: |
+          gh pr merge \
+            --delete-branch \
+            --merge \
+            '${{ github.event.pull_request.number }}'
