@@ -32,7 +32,7 @@ jobs:
         uses: Homebrew/actions/git-try-push@master
         with:
           token: ${{ github.token }}
-          branch: main
+          branch: ${{ github.head_ref }}
 
       - name: Delete branch
         if: github.event.pull_request.head.repo.fork == false
