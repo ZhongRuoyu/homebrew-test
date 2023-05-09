@@ -6,6 +6,12 @@ class Bat < Formula
   license any_of: ["Apache-2.0", "MIT"]
   head "https://github.com/sharkdp/bat.git", branch: "master"
 
+  bottle do
+    root_url "https://github.com/ZhongRuoyu/homebrew-test/releases/download/bat-0.23.0"
+    sha256 cellar: :any_skip_relocation, ventura:      "e6c84574d2dbca935d4864b9b58fa1d5ef7c1fbff7a4ed10f7d18990c3959e20"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "d0b5c7d02aef78fc6e76970209c7064c494bb8eded7becedbaa8273fdba96b54"
+  end
+
   depends_on "rust" => :build
 
   uses_from_macos "zlib"
