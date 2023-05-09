@@ -38,6 +38,7 @@ jobs:
             --debug \
             --clean \
             --no-cherry-pick \
+            --tap='${{ github.repository }}' \
             --workflows=tests.yml \
             '${{ github.event.pull_request.number }}'
 
