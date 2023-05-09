@@ -34,8 +34,5 @@ jobs:
           token: ${{ github.token }}
           branch: ${{ github.head_ref }}
 
-      - name: Delete branch
-        if: github.event.pull_request.head.repo.fork == false
-        env:
-          BRANCH: ${{ github.event.pull_request.head.ref }}
-        run: git push --delete origin $BRANCH
+      - name: Merge pull request
+        run: gh pr merge --delete-branch --merge '${{ github.event.pull_request.number }}'
