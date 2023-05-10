@@ -45,6 +45,7 @@ jobs:
         run: gh pr checkout "$PR"
 
       - name: Pull bottles
+        id: brew-pr-pull
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
@@ -56,6 +57,7 @@ jobs:
             --tap="$GH_REPO" \
             --workflows=tests.yml \
             "$PR"
+          echo "head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Push commits
         uses: Homebrew/actions/git-try-push@master
@@ -74,9 +76,10 @@ jobs:
 
       - name: Wait until PR branch is in sync with local repository
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
+        env:
+          EXPECTED_SHA: ${{ steps.brew-pr-pull.outputs.head_sha }}
         run: |
-          local_head="$(git rev-parse HEAD)"
-          echo "::notice::Local repository HEAD: $local_head"
+          echo "::notice::Local repository HEAD: $EXPECTED_SHA"
 
           # Wait (with exponential backoff) until the PR branch is in sync
           max_attempts=10
@@ -85,7 +88,7 @@ jobs:
           while [[ "$attempt" -lt "$max_attempts" ]]
           do
             remote_head="$(git ls-remote origin "pull/$PR/head" | cut -f1)"
-            if [[ "$remote_head" = "$local_head" ]]
+            if [[ "$remote_head" = "$EXPECTED_SHA" ]]
             then
               success=1
               break
@@ -98,7 +101,7 @@ jobs:
 
           # One last check...
           if [[ -z "$success" ]] &&
-             [[ "$(git ls-remote origin "pull/$PR/head" | cut -f1)" != "$local_head" ]]
+             [[ "$(git ls-remote origin "pull/$PR/head" | cut -f1)" != "$EXPECTED_SHA" ]]
           then
             echo "::error::No attempts remaining. Giving up."
             exit 1
@@ -108,5 +111,10 @@ jobs:
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
         env:
           GH_TOKEN: ${{ github.token }}
+          EXPECTED_SHA: ${{ steps.brew-pr-pull.outputs.head_sha }}
         run: |
-          gh pr merge --delete-branch --merge "$PR"
+          gh pr merge \
+            --delete-branch \
+            --match-head-commit="$EXPECTED_SHA" \
+            --merge \
+            "$PR"
