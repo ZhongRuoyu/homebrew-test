@@ -57,6 +57,15 @@ jobs:
           directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
           branch: ${{ github.head_ref }}
 
+      - name: Remove `pr-pull` label on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr edit \
+            --remove-label=pr-pull \
+            '${{ github.event.pull_request.number }}'
+
       - name: Merge PR
         env:
           GH_TOKEN: ${{ github.token }}
