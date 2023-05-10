@@ -7,6 +7,14 @@ class Bat < Formula
   revision 1
   head "https://github.com/sharkdp/bat.git", branch: "master"
 
+  bottle do
+    root_url "https://github.com/ZhongRuoyu/homebrew-test/releases/download/bat-0.23.0_1"
+    sha256 cellar: :any_skip_relocation, ventura:      "2f86da5a9e6a2be3f9d4ce4eec3a61b68bc2420353d753df83290ce2496aa57b"
+    sha256 cellar: :any_skip_relocation, monterey:     "121592979a58cbf7efef8a2abd6711919bf94b3a0e4e6a0e0345ac1ca7634c4f"
+    sha256 cellar: :any_skip_relocation, big_sur:      "c47c29e99f81995144328934395acc7d5ad8da6b3913fa462373a20b5b2fc4b6"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "f021448900c305ae0a9bec5032734d31f607917f04eaa2f9ba1eac8da3e0417b"
+  end
+
   depends_on "rust" => :build
 
   uses_from_macos "zlib"
