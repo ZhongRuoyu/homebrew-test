@@ -35,7 +35,10 @@ jobs:
     container: ${{ matrix.container }}
     defaults:
       run:
+        shell: bash
         working-directory: ${{ matrix.working-directory || github.workspace }}
+    env:
+      BOTTLES_DIR: ${{ matrix.working-directory || github.workspace }}/bottles
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
@@ -57,14 +60,20 @@ jobs:
 
       - run: brew test-bot --only-setup
 
+      - name: Set up bottles directory
+        run: |
+          rm -rvf "$BOTTLES_DIR"
+          mkdir "$BOTTLES_DIR"
+
       - run: brew test-bot --only-tap-syntax
 
       - run: brew test-bot --only-formulae
         if: github.event_name == 'pull_request'
+        working-directory: ${{ env.BOTTLES_DIR }}
 
       - name: Upload bottles as artifact
         if: always() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@main
         with:
           name: bottles
-          path: '*.bottle.*'
+          path: ${{ env.BOTTLES_DIR }}
