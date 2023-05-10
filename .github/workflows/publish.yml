@@ -98,7 +98,7 @@ jobs:
 
           # One last check...
           if [[ -z "$success" ]] &&
-             [[ "$(git ls-remote origin "pull/$PR/head" | cut -f1)" != "$local_head"]]
+             [[ "$(git ls-remote origin "pull/$PR/head" | cut -f1)" != "$local_head" ]]
           then
             echo "::error::No attempts remaining. Giving up."
             exit 1
