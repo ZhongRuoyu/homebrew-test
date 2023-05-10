@@ -4,6 +4,7 @@ class Bat < Formula
   url "https://github.com/sharkdp/bat/archive/v0.23.0.tar.gz"
   sha256 "30b6256bea0143caebd08256e0a605280afbbc5eef7ce692f84621eb232a9b31"
   license any_of: ["Apache-2.0", "MIT"]
+  revision 1
   head "https://github.com/sharkdp/bat.git", branch: "master"
 
   depends_on "rust" => :build
