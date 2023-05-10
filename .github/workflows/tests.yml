@@ -20,16 +20,16 @@ jobs:
         include:
           - name: macOS 13
             runs-on: macos-13
-            cleanup: true
+            cleanup-before: true
           - name: macOS 12
             runs-on: macos-12
-            cleanup: true
+            cleanup-before: true
           - name: macOS 11
             runs-on: macos-11
-            cleanup: true
+            cleanup-before: true
           - name: Ubuntu 22.04
             runs-on: ubuntu-22.04
-            cleanup: false
+            cleanup-before: false
             container:
               image: ghcr.io/homebrew/ubuntu22.04:master
               options: --user=linuxbrew
@@ -48,7 +48,7 @@ jobs:
         uses: Homebrew/actions/pre-build@master
         with:
           bottles-directory: ${{ env.BOTTLES_DIR }}
-          cleanup: ${{ github.event_name == 'pull_request' && matrix.cleanup }}
+          cleanup: ${{ matrix.cleanup-before }}
 
       - run: brew test-bot --only-tap-syntax
 
@@ -66,4 +66,4 @@ jobs:
           bottles-directory: ${{ env.BOTTLES_DIR }}
           logs-directory: ${{ format('{0}/logs', env.BOTTLES_DIR) }}
           runner: ${{ matrix.runs-on }}
-          cleanup: ${{ matrix.cleanup }}
+          cleanup: false
