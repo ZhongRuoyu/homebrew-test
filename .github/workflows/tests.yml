@@ -26,10 +26,16 @@ jobs:
             runs-on: macos-11
           - name: Ubuntu 22.04
             runs-on: ubuntu-22.04
-            container: ghcr.io/homebrew/ubuntu22.04:master
+            container:
+              image: ghcr.io/homebrew/ubuntu22.04:master
+              options: --user=linuxbrew
+            working-directory: /github/home
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.runs-on }}
     container: ${{ matrix.container }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.working-directory || github.workspace }}
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
