@@ -15,6 +15,8 @@ permissions:
   pull-requests: write
 
 env:
+  GH_REPO: ${{ github.repository }}
+  PR: ${{ github.event.pull_request.number }}
   HOMEBREW_NO_INSTALL_FROM_API: "1"
 
 jobs:
@@ -26,6 +28,7 @@ jobs:
       options: --user=linuxbrew
     defaults:
       run:
+        shell: bash
         working-directory: /github/home
     steps:
       - name: Set up Homebrew
@@ -39,7 +42,7 @@ jobs:
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr checkout '${{ github.event.pull_request.number }}'
+        run: gh pr checkout "$PR"
 
       - name: Pull bottles
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
@@ -50,9 +53,9 @@ jobs:
             --debug \
             --clean \
             --no-cherry-pick \
-            --tap='${{ github.repository }}' \
+            --tap="$GH_REPO" \
             --workflows=tests.yml \
-            '${{ github.event.pull_request.number }}'
+            "$PR"
 
       - name: Push commits
         uses: Homebrew/actions/git-try-push@master
@@ -67,16 +70,43 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr edit \
-            --remove-label=pr-pull \
-            '${{ github.event.pull_request.number }}'
+          gh pr edit --remove-label=pr-pull "$PR"
+
+      - name: Wait until PR branch is in sync with local repository
+        working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
+        run: |
+          local_head="$(git rev-parse HEAD)"
+          echo "::notice::Local repository HEAD: $local_head"
+
+          # Wait (with exponential backoff) until the PR branch is in sync
+          max_attempts=10
+          attempt=0
+          timeout=1
+          while [[ "$attempt" -lt "$max_attempts" ]]
+          do
+            remote_head="$(git ls-remote origin "pull/$PR/head" | cut -f1)"
+            if [[ "$remote_head" = "$local_head" ]]
+            then
+              success=1
+              break
+            fi
+            echo "::notice::Remote repository not in sync. Checking again in ${timeout}s..."
+            sleep "$timeout"
+            attempt=$(( attempt + 1 ))
+            timeout=$(( timeout * 2 ))
+          done
+
+          # One last check...
+          if [[ -z "$success" ]] &&
+             [[ "$(git ls-remote origin "pull/$PR/head" | cut -f1)" != "$local_head"]]
+          then
+            echo "::error::No attempts remaining. Giving up."
+            exit 1
+          fi
 
       - name: Merge PR
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr merge \
-            --delete-branch \
-            --merge \
-            '${{ github.event.pull_request.number }}'
+          gh pr merge --delete-branch --merge "$PR"
