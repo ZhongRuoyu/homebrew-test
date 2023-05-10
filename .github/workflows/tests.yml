@@ -20,12 +20,16 @@ jobs:
         include:
           - name: macOS 13
             runs-on: macos-13
+            cleanup: true
           - name: macOS 12
             runs-on: macos-12
+            cleanup: true
           - name: macOS 11
             runs-on: macos-11
+            cleanup: true
           - name: Ubuntu 22.04
             runs-on: ubuntu-22.04
+            cleanup: false
             container:
               image: ghcr.io/homebrew/ubuntu22.04:master
               options: --user=linuxbrew
@@ -40,40 +44,26 @@ jobs:
     env:
       BOTTLES_DIR: ${{ matrix.working-directory || github.workspace }}/bottles
     steps:
-      - name: Set up Homebrew
-        id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
-
-      - name: Cache Homebrew Bundler RubyGems
-        id: cache
-        uses: actions/cache@v3
+      - name: Pre-test steps
+        uses: Homebrew/actions/pre-build@master
         with:
-          path: ${{ steps.set-up-homebrew.outputs.gems-path }}
-          key: ${{ runner.os }}-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
-          restore-keys: ${{ runner.os }}-rubygems-
-
-      - name: Install Homebrew Bundler RubyGems
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: brew install-bundler-gems
-
-      - run: brew test-bot --only-cleanup-before
-
-      - run: brew test-bot --only-setup
-
-      - name: Set up bottles directory
-        run: |
-          rm -rvf "$BOTTLES_DIR"
-          mkdir "$BOTTLES_DIR"
+          bottles-directory: ${{ env.BOTTLES_DIR }}
+          cleanup: ${{ github.event_name == 'pull_request' && matrix.cleanup }}
 
       - run: brew test-bot --only-tap-syntax
 
       - run: brew test-bot --only-formulae
+        id: brew-test-bot-formulae
         if: github.event_name == 'pull_request'
         working-directory: ${{ env.BOTTLES_DIR }}
 
-      - name: Upload bottles as artifact
-        if: always() && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@main
+      - name: Post-build steps
+        if: >
+          github.event_name == 'pull_request' &&
+          !contains(fromJson('["skipped", "cancelled"]'), steps.brew-test-bot-formulae.conclusion)
+        uses: Homebrew/actions/post-build@master
         with:
-          name: bottles
-          path: ${{ env.BOTTLES_DIR }}
+          bottles-directory: ${{ env.BOTTLES_DIR }}
+          logs-directory: ${{ format('{0}/logs', env.BOTTLES_DIR) }}
+          runner: ${{ matrix.runs-on }}
+          cleanup: ${{ matrix.cleanup }}
