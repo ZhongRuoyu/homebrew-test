@@ -52,7 +52,7 @@ jobs:
 
       - run: brew test-bot --only-tap-syntax
 
-      - run: brew test-bot --only-formulae --root-url='https://ghcr.io/v2/zhongruoyu/homebrew-test'
+      - run: brew test-bot --only-formulae --root-url='https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test'
         id: brew-test-bot-formulae
         if: github.event_name == 'pull_request'
         working-directory: ${{ env.BOTTLES_DIR }}
