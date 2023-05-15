@@ -8,11 +8,11 @@ class Trurl < Formula
   head "https://github.com/curl/trurl.git", branch: "master"
 
   bottle do
-    root_url "https://ghcr.io/v2/zhongruoyu/test-gh-packages"
-    sha256 cellar: :any_skip_relocation, ventura:      "98b18881ba682cff302bfa4932294ce7e1d994a67298f1b5db6b4322241e4f74"
-    sha256 cellar: :any,                 monterey:     "88bcaf5d71bc870a8615062343a40a256c40c0dc46f464f0883ce05db1f7acb4"
-    sha256 cellar: :any,                 big_sur:      "5a89f0838c21393eb11b2047aaf915f1b4a15418bdc16a0807220942aa3b444a"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "d599d87b9077d741d954a136079135aa3af42c15262b9964637fe8ef4c887271"
+    root_url "https://ghcr.io/v2/zhongruoyu/test"
+    sha256 cellar: :any_skip_relocation, ventura:      "a5a488c2beb091a310aab3782b53037b1f2b2db56196c5a4c7e583a3ff2071f0"
+    sha256 cellar: :any,                 monterey:     "68f40e3f585cdb66c2a72792012b46708c45718f0c78abf923dcd5d53ed9fda2"
+    sha256 cellar: :any,                 big_sur:      "4afb0d835558c86998bec0613ef4513d378f0d9604c40ffd67d64af29ae0362f"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "42239fa5fa9b88aa0efe70c86bcb761ede38e403d8f25cebc688b78b55ad480a"
   end
 
   uses_from_macos "curl", since: :ventura # uses CURLUE_NO_ZONEID, available since curl 7.81.0
