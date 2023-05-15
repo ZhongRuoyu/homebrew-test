@@ -4,7 +4,7 @@ class Trurl < Formula
   url "https://github.com/curl/trurl/archive/refs/tags/trurl-0.6.tar.gz"
   sha256 "4564dff7441d33a29aa02fe64bea7ef0809d9fabc1609ac5b50ca5503e81caa6"
   license "curl"
-  revision 2
+  revision 3
   head "https://github.com/curl/trurl.git", branch: "master"
 
   bottle do
