@@ -4,15 +4,15 @@ class Bat < Formula
   url "https://github.com/sharkdp/bat/archive/v0.23.0.tar.gz"
   sha256 "30b6256bea0143caebd08256e0a605280afbbc5eef7ce692f84621eb232a9b31"
   license any_of: ["Apache-2.0", "MIT"]
-  revision 1
+  revision 2
   head "https://github.com/sharkdp/bat.git", branch: "master"
 
   bottle do
-    root_url "https://github.com/ZhongRuoyu/homebrew-test/releases/download/bat-0.23.0_1"
-    sha256 cellar: :any_skip_relocation, ventura:      "2f86da5a9e6a2be3f9d4ce4eec3a61b68bc2420353d753df83290ce2496aa57b"
-    sha256 cellar: :any_skip_relocation, monterey:     "121592979a58cbf7efef8a2abd6711919bf94b3a0e4e6a0e0345ac1ca7634c4f"
-    sha256 cellar: :any_skip_relocation, big_sur:      "c47c29e99f81995144328934395acc7d5ad8da6b3913fa462373a20b5b2fc4b6"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "f021448900c305ae0a9bec5032734d31f607917f04eaa2f9ba1eac8da3e0417b"
+    root_url "https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test"
+    sha256 cellar: :any_skip_relocation, ventura:      "e5c00a9b6f84095d1e1e835fed5bc591ba2ef6c9bdd8221486874d359b493159"
+    sha256 cellar: :any_skip_relocation, monterey:     "16d80646cd5b87a199b455946246777e196f220be44d420a4cbfa42243bb20f5"
+    sha256 cellar: :any_skip_relocation, big_sur:      "87570cf37751ff17d1e76ffe446c48fdc6e6f7d59d3d2e78033c7345bd4c1485"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "0c6b1d17a67e0b98d2ad0aef78dced608a874f753cfc76c0d31a94858e29fca4"
   end
 
   depends_on "rust" => :build
