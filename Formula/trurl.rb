@@ -22,7 +22,8 @@ class Trurl < Formula
   end
 
   test do
-    assert_equal "https 443 /hello.html",
-      shell_output("#{bin}/trurl https://example.com/hello.html --get '{scheme} {port} {path}'").chomp
+    output = shell_output(bin/"trurl https://example.com/hello.html " \
+                              "--default-port --get '{scheme} {port} {path}'").chomp
+    assert_equal "https 443 /hello.html", output
   end
 end
