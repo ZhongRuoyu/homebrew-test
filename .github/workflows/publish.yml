@@ -18,7 +18,6 @@ permissions:
 env:
   GH_REPO: ${{ github.repository }}
   PR: ${{ github.event.pull_request.number }}
-  HOMEBREW_NO_INSTALL_FROM_API: "1"
 
 jobs:
   pr-pull:
