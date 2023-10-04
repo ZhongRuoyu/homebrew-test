@@ -23,10 +23,10 @@ class Bat < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test"
-    sha256 cellar: :any_skip_relocation, ventura:      "496ad230b324502ba36383d65d1b5863bb5db1ebfec64cc5c7e1614a75158f7e"
-    sha256 cellar: :any_skip_relocation, monterey:     "e4df7333be413379484d3279e51fc8e363ba4abb2c9a0d0a8d2fa1482c0a0599"
-    sha256 cellar: :any_skip_relocation, big_sur:      "5d381a1d74612137d1928460bed99c04ca4a97f7c2cb3a0170c7331b79dcceca"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "da405d41ea9c555838c41359c8590b578f8fb79882190a3b57e75bb580841446"
+    sha256 cellar: :any,                 ventura:      "471c910bbfca4057572788af05f2d2c854cc23ace93b33da181a30056e1b7f91"
+    sha256 cellar: :any,                 monterey:     "acb449b15f6a7604373740bcef203ad0e3c4f63245177b10566f396d16d54255"
+    sha256 cellar: :any,                 big_sur:      "089ac277838929413ee4c2556e885997ad5aa33c7f7d2ae791d737352abd01e2"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "02424b7900ebd5e1ce4399103086b8024f6abc94218f28298e909d693b5c9303"
   end
 
   # TODO: Remove `head` block when `stable` uses unversioned `libgit2`.
