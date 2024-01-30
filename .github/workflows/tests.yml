@@ -15,13 +15,16 @@ jobs:
     strategy:
       matrix:
         include:
-          - name: macOS 13
+          - name: macOS 14 (arm64)
+            runs-on: macos-14
+            cleanup-before: true
+          - name: macOS 13 (x86_64)
             runs-on: macos-13
             cleanup-before: true
-          - name: macOS 12
+          - name: macOS 12 (x86_64)
             runs-on: macos-12
             cleanup-before: true
-          - name: macOS 11
+          - name: macOS 11 (x86_64)
             runs-on: macos-11
             cleanup-before: true
           - name: Ubuntu 22.04
