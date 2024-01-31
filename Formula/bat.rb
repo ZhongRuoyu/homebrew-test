@@ -1,47 +1,26 @@
 class Bat < Formula
   desc "Clone of cat(1) with syntax highlighting and Git integration"
   homepage "https://github.com/sharkdp/bat"
+  url "https://github.com/sharkdp/bat/archive/refs/tags/v0.24.0.tar.gz"
+  sha256 "907554a9eff239f256ee8fe05a922aad84febe4fe10a499def72a4557e9eedfb"
   license any_of: ["Apache-2.0", "MIT"]
-  revision 4
-
-  # TODO: Remove `stable` block when we can use unversioned `libgit2`.
-  stable do
-    # TODO: check if we can use unversioned `libgit2` at version bump.
-    # Remove `stable` and `head` blocks when this is done.
-    # See comments below for details.
-    url "https://github.com/sharkdp/bat/archive/refs/tags/v0.23.0.tar.gz"
-    sha256 "30b6256bea0143caebd08256e0a605280afbbc5eef7ce692f84621eb232a9b31"
-
-    # To check for `libgit2` version:
-    # 1. Search for `libgit2-sys` version at https://github.com/sharkdp/bat/blob/v#{version}/Cargo.lock
-    # 2. If the version suffix of `libgit2-sys` is newer than +1.5.*, then:
-    #    - Use the corresponding `libgit2` formula.
-    #    - Remove `LIBGIT2_SYS_USE_PKG_CONFIG` env var below.
-    #      See: https://github.com/rust-lang/git2-rs/commit/59a81cac9ada22b5ea6ca2841f5bd1229f1dd659.
-    depends_on "libgit2@1.5"
-  end
+  head "https://github.com/sharkdp/bat.git", branch: "master"
 
   bottle do
     root_url "https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test"
-    sha256 cellar: :any,                 ventura:      "471c910bbfca4057572788af05f2d2c854cc23ace93b33da181a30056e1b7f91"
-    sha256 cellar: :any,                 monterey:     "acb449b15f6a7604373740bcef203ad0e3c4f63245177b10566f396d16d54255"
-    sha256 cellar: :any,                 big_sur:      "089ac277838929413ee4c2556e885997ad5aa33c7f7d2ae791d737352abd01e2"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "02424b7900ebd5e1ce4399103086b8024f6abc94218f28298e909d693b5c9303"
-  end
-
-  # TODO: Remove `head` block when `stable` uses unversioned `libgit2`.
-  head do
-    url "https://github.com/sharkdp/bat.git", branch: "master"
-    depends_on "libgit2"
+    sha256 cellar: :any,                 arm64_sonoma: "6883fcc8caa0c6989981377cac9a6f042d5bbc511ed24df6b6662704e7355783"
+    sha256 cellar: :any,                 ventura:      "332f46c79ca9049746a77dab797c140c41b79a7a7274d7b0fab1d0cc1c1c2f9e"
+    sha256 cellar: :any,                 monterey:     "c6091fcecdf689f4d59991edd88bb14729da2b3d119bdc2f00f5d8d895c82903"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "948c3adb1b9d26dd03b4ae54e735c7714333a73151f01d58e191e37f7cea62ec"
   end
 
   depends_on "pkg-config" => :build
   depends_on "rust" => :build
+  depends_on "libgit2"
   depends_on "oniguruma"
 
   def install
     ENV["LIBGIT2_NO_VENDOR"] = "1"
-    ENV["LIBGIT2_SYS_USE_PKG_CONFIG"] = "1"
     ENV["RUSTONIG_DYNAMIC_LIBONIG"] = "1"
     ENV["RUSTONIG_SYSTEM_LIBONIG"] = "1"
 
@@ -69,7 +48,7 @@ class Bat < Formula
     assert_match "Homebrew test", output
 
     [
-      Formula["libgit2@1.5"].opt_lib/shared_library("libgit2"),
+      Formula["libgit2"].opt_lib/shared_library("libgit2"),
       Formula["oniguruma"].opt_lib/shared_library("libonig"),
     ].each do |library|
       assert check_binary_linkage(bin/"bat", library),
