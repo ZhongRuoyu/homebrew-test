@@ -35,6 +35,14 @@ jobs:
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
 
+      - name: Check out Homebrew/brew branch for artifact actions v4
+        run: |
+          cd "$(brew --repository)"
+          git remote add ZhongRuoyu https://github.com/ZhongRuoyu/brew.git
+          git fetch ZhongRuoyu
+          git checkout artifact-actions-v4
+          echo "HOMEBREW_DEVELOPER=1" >> "$GITHUB_ENV"
+
       - name: Set up git
         uses: Homebrew/actions/git-user-config@master
 
