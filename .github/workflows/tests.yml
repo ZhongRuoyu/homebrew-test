@@ -61,7 +61,7 @@ jobs:
         if: >
           github.event_name == 'pull_request' &&
           !contains(fromJson('["skipped", "cancelled"]'), steps.brew-test-bot-formulae.conclusion)
-        uses: ZhongRuoyu/actions/post-build@artifact-actions-v4
+        uses: Homebrew/actions/post-build@master
         with:
           bottles-directory: ${{ env.BOTTLES_DIR }}
           logs-directory: ${{ format('{0}/logs', env.BOTTLES_DIR) }}
