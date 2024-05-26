@@ -8,10 +8,10 @@ class Trurl < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test"
-    sha256 cellar: :any_skip_relocation, ventura:      "43d8a8c85702d61034d484b0023adfd8c9534a726f7f3facff760cf001cd9ed9"
-    sha256 cellar: :any,                 monterey:     "fef965bdb7a5efdbcc364e6fd4cc366e939e419a2c0e0593d5503085a4804266"
-    sha256 cellar: :any,                 big_sur:      "8da9cbe52305cd4ae0c9aa2d71c5aed7e95fa6d4c107a0ea8711fce21056bc92"
-    sha256 cellar: :any_skip_relocation, x86_64_linux: "c12087b3e0be83a868d73d7c0e9ae0216012c6107ee2ece92eed9c1f9415bc2e"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma: "50a7da83883e909d532e5c733d28f8c73fed51508b139f194412357da8c3df1b"
+    sha256 cellar: :any_skip_relocation, ventura:      "a2cac4c662840063bfca2445226d6966a693d8d657e8c03f3fc1ad68af3cb7e2"
+    sha256 cellar: :any,                 monterey:     "f2f785569b6a5b6e11599e29f67677921c649b8072dc4b24fe36d97971f89de1"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "0d5fd0cb634f5b9fea05cd6cd6b57be7ca85dd26f789042e9b863923d94050fb"
   end
 
   uses_from_macos "curl", since: :ventura # uses CURLUE_NO_ZONEID, available since curl 7.81.0
