@@ -14,7 +14,33 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  test-bot:
+  tap-syntax:
+    name: Tap syntax
+    runs-on: ubuntu-22.04
+    container:
+      image: ghcr.io/homebrew/ubuntu22.04:main
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+        with:
+          core: true
+          cask: false
+          test-bot: true
+          stable: true
+
+      - name: Cache style cache
+        uses: actions/cache@v4
+        with:
+          path: /home/linuxbrew/.cache/Homebrew/style
+          key: style-cache-${{ github.sha }}
+          restore-keys: style-cache-
+
+      - run: brew test-bot --only-tap-syntax
+
+  tests:
+    needs: tap-syntax
+    if: github.event_name == 'pull_request'
     strategy:
       fail-fast: false
       matrix:
