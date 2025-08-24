@@ -16,6 +16,7 @@ concurrency:
 jobs:
   test-bot:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - name: macOS 15 (arm64)
