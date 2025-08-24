@@ -9,12 +9,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
   cancel-in-progress: false
 
-permissions:
-  actions: read
-  contents: write
-  packages: write
-  pull-requests: write
-
 env:
   GH_REPO: ${{ github.repository }}
   PR: ${{ github.event.pull_request.number }}
@@ -24,8 +18,14 @@ jobs:
     if: contains(github.event.pull_request.labels.*.name, 'pr-pull')
     runs-on: ubuntu-22.04
     container:
-      image: ghcr.io/homebrew/ubuntu22.04:master
-      options: --user=linuxbrew
+      image: ghcr.io/homebrew/ubuntu22.04:main
+    permissions:
+      actions: read
+      checks: read
+      contents: write
+      issues: read
+      packages: write
+      pull-requests: write
     defaults:
       run:
         shell: bash
@@ -33,10 +33,10 @@ jobs:
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@main
 
       - name: Set up git
-        uses: Homebrew/actions/git-user-config@master
+        uses: Homebrew/actions/git-user-config@main
 
       - name: Checkout PR branch
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
@@ -62,7 +62,7 @@ jobs:
           echo "head_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Push commits
-        uses: Homebrew/actions/git-try-push@master
+        uses: Homebrew/actions/git-try-push@main
         with:
           token: ${{ github.token }}
           directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
@@ -81,12 +81,11 @@ jobs:
         env:
           EXPECTED_SHA: ${{ steps.brew-pr-pull.outputs.head_sha }}
         run: |
-          echo "::notice::Local repository HEAD: $EXPECTED_SHA"
-
-          # Wait (with exponential backoff) until the PR branch is in sync
           max_attempts=10
           attempt=0
           timeout=1
+
+          # Wait (with exponential backoff) until the PR branch is in sync
           while [[ "$attempt" -lt "$max_attempts" ]]
           do
             remote_head="$(git ls-remote origin "pull/$PR/head" | cut -f1)"
@@ -95,17 +94,16 @@ jobs:
               success=1
               break
             fi
-            echo "::notice::Remote repository not in sync. Checking again in ${timeout}s..."
+            echo "Remote repository not in sync. Checking again in ${timeout}s..."
             sleep "$timeout"
             attempt=$(( attempt + 1 ))
             timeout=$(( timeout * 2 ))
           done
 
-          # One last check...
           if [[ -z "$success" ]] &&
              [[ "$(git ls-remote origin "pull/$PR/head" | cut -f1)" != "$EXPECTED_SHA" ]]
           then
-            echo "::error::No attempts remaining. Giving up."
+            echo "::error::Remote repository is not in sync with local repository."
             exit 1
           fi
 
