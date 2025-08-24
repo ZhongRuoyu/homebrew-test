@@ -15,27 +15,32 @@ jobs:
     strategy:
       matrix:
         include:
+          - name: macOS 15 (arm64)
+            runs-on: macos-15
           - name: macOS 14 (arm64)
             runs-on: macos-14
-            cleanup-before: true
           - name: macOS 13 (x86_64)
             runs-on: macos-13
-            cleanup-before: true
-          - name: macOS 12 (x86_64)
-            runs-on: macos-12
-            cleanup-before: true
-          - name: macOS 11 (x86_64)
-            runs-on: macos-11
-            cleanup-before: true
-          - name: Ubuntu 22.04
+          - name: Ubuntu 22.04 (x86_64)
             runs-on: ubuntu-22.04
-            cleanup-before: false
             container:
-              image: ghcr.io/homebrew/ubuntu22.04:master
+              image: ghcr.io/homebrew/ubuntu22.04:main
+              options: --user=linuxbrew
+            working-directory: /github/home
+          - name: Ubuntu 22.04 (arm64)
+            runs-on: ubuntu-22.04-arm
+            container:
+              image: ghcr.io/homebrew/ubuntu22.04:main
               options: --user=linuxbrew
             working-directory: /github/home
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.runs-on }}
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      packages: read
+      pull-requests: read
     container: ${{ matrix.container }}
     defaults:
       run:
@@ -45,23 +50,33 @@ jobs:
       BOTTLES_DIR: ${{ matrix.working-directory || github.workspace }}/bottles
     steps:
       - name: Pre-test steps
-        uses: Homebrew/actions/pre-build@master
+        uses: Homebrew/actions/pre-build@main
         with:
           bottles-directory: ${{ env.BOTTLES_DIR }}
-          cleanup: ${{ matrix.cleanup-before }}
+          cleanup: ${{ runner.os == 'macOS' }}
 
       - run: brew test-bot --only-tap-syntax
+
+      - name: Base64-encode GITHUB_TOKEN for HOMEBREW_DOCKER_REGISTRY_TOKEN
+        id: base64-encode
+        if: github.event_name == 'pull_request'
+        env:
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          base64_token=$(echo -n "${TOKEN}" | base64 | tr -d "\\n")
+          echo "::add-mask::${base64_token}"
+          echo "token=${base64_token}" >> "${GITHUB_OUTPUT}"
 
       - run: brew test-bot --only-formulae --root-url='https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test'
         id: brew-test-bot-formulae
         if: github.event_name == 'pull_request'
+        env:
+          HOMEBREW_DOCKER_REGISTRY_TOKEN: ${{ steps.base64-encode.outputs.token }}
         working-directory: ${{ env.BOTTLES_DIR }}
 
       - name: Post-build steps
-        if: >
-          github.event_name == 'pull_request' &&
-          !contains(fromJson('["skipped", "cancelled"]'), steps.brew-test-bot-formulae.conclusion)
-        uses: Homebrew/actions/post-build@master
+        if: always() && github.event_name == 'pull_request'
+        uses: Homebrew/actions/post-build@main
         with:
           bottles-directory: ${{ env.BOTTLES_DIR }}
           logs-directory: ${{ format('{0}/logs', env.BOTTLES_DIR) }}
