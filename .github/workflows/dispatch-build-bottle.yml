@@ -46,7 +46,7 @@ defaults:
     shell: bash -xeuo pipefail {0}
 
 # Intentionally the same as dispatch-rebottle
-concurrency: bottle-${{ github.event.inputs.formula }}
+concurrency: bottle-${{ inputs.formula }}
 
 permissions:
   contents: read
@@ -115,7 +115,6 @@ jobs:
           matrix = JSON.parse(ENV.fetch("HOMEBREW_RUNNER_MATRIX"))
           formula_name = ENV.fetch("HOMEBREW_DISPATCHED_FORMULA")
           formula = Formulary.factory(formula_name)
-          exit_code = 0
 
           bottled_tags = matrix.filter_map do |entry|
             runner = entry.fetch("runner")
@@ -151,9 +150,10 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJson(needs.prepare.outputs.runners) }}
+    name: Build bottle on ${{ matrix.runner }}
     runs-on: ${{ matrix.runner }}
     container: ${{ matrix.container }}
-    timeout-minutes: ${{ fromJson(github.event.inputs.timeout) }}
+    timeout-minutes: ${{ fromJson(inputs.timeout) }}
     permissions:
       actions: read
       checks: read
@@ -242,7 +242,7 @@ jobs:
           username: ${{ github.actor }}
 
       - name: Checkout branch for bottle commit
-        working-directory: ${{steps.set-up-homebrew.outputs.repository-path}}
+        working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
         run: git checkout -b "$BOTTLE_BRANCH" origin/HEAD
 
       - name: Upload bottles to GitHub Packages
@@ -253,7 +253,10 @@ jobs:
           HOMEBREW_TAP_PATH: ${{ steps.set-up-homebrew.outputs.repository-path }}
         working-directory: ${{ env.BOTTLES_DIR }}
         run: |
-          brew pr-upload --verbose --keep-old --root-url="https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test"
+          brew pr-upload \
+            --verbose \
+            --keep-old \
+            --root-url="https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test"
           echo "title=$(git -C "$HOMEBREW_TAP_PATH" log -1 --format='%s' "$BOTTLE_BRANCH")" >> "$GITHUB_OUTPUT"
           echo "head_sha=$(git -C "$HOMEBREW_TAP_PATH" rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
@@ -274,23 +277,6 @@ jobs:
           title: ${{ steps.upload.outputs.title }}
           body: Created by [`brew dispatch-build-bottle`](${{ env.RUN_URL }})
           reviewers: ${{ github.actor }}
-
-      - name: Enable automerge
-        env:
-          GH_TOKEN: ${{ github.action }}
-          NODE_ID: ${{ steps.create-pr.outputs.node_id }}
-          SHA: ${{ steps.upload.outputs.head_sha }}
-          MUTATION: |-
-            mutation ($input: EnablePullRequestAutoMergeInput!) {
-              enablePullRequestAutoMerge(input: $input) {
-                clientMutationId
-              }
-            }
-        run: |
-          gh api graphql \
-            --field "input[pullRequestId]=$NODE_ID" \
-            --field "input[expectedHeadOid]=$SHA" \
-            --raw-field query="$MUTATION"
 
       - name: Merge PR
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
@@ -315,7 +301,7 @@ jobs:
       - name: Post comment on failure
         uses: Homebrew/actions/post-comment@main
         with:
-          token: ${{ github.token}}
+          token: ${{ github.token }}
           issue: ${{ inputs.issue }}
           body: ":x: @${{ github.actor }} bottle request for ${{ inputs.formula }} [failed](${{ env.RUN_URL }})."
           bot_body: ":x: Bottle request for ${{ inputs.formula }} [failed](${{ env.RUN_URL }})."
