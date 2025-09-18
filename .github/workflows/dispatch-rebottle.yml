@@ -10,7 +10,7 @@ on:
         required: true
       reason:
         description: Reason for rebottling
-        required: true
+        required: false
       timeout:
         description: "Build timeout (in minutes, default: 60 minutes)"
         type: number
