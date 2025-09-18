@@ -127,8 +127,11 @@ jobs:
               runner_spec([:linux, :x86_64]),
               runner_spec([:linux, :arm64]),
               *MacOSVersion::SYMBOLS.keys.flat_map do |system|
-                [runner_spec(system), runner_spec(system, :arm64)]
-              end.compact,
+                [
+                  runner_spec(system, :x86_64),
+                  runner_spec(system, :arm64),
+                ].compact
+              end,
             ]
           else
             tags.filter_map do |tag|
