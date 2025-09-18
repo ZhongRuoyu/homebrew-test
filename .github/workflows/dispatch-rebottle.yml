@@ -84,6 +84,8 @@ jobs:
       - name: Determine runners
         id: determine-runners
         shell: brew ruby {0}
+        env:
+          HOMEBREW_DISPATCHED_FORMULA: ${{ inputs.formula }}
         run: |
           RUNNERS = {
             [:tahoe, :arm64]    => "macos-26",
@@ -116,7 +118,7 @@ jobs:
             end
           end
 
-          formula_name = ENV.fetch("DISPATCH_REBOTTLE_FORMULA")
+          formula_name = ENV.fetch("HOMEBREW_DISPATCHED_FORMULA")
           formula = Formulary.factory(formula_name)
 
           tags = formula.bottle_specification.collector.tags
