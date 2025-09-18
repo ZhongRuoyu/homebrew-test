@@ -115,7 +115,6 @@ jobs:
           matrix = JSON.parse(ENV.fetch("HOMEBREW_RUNNER_MATRIX"))
           formula_name = ENV.fetch("HOMEBREW_DISPATCHED_FORMULA")
           formula = Formulary.factory(formula_name)
-          exit_code = 0
 
           bottled_tags = matrix.filter_map do |entry|
             runner = entry.fetch("runner")
@@ -151,6 +150,7 @@ jobs:
     strategy:
       matrix:
         include: ${{ fromJson(needs.prepare.outputs.runners) }}
+    name: Build bottle on ${{ matrix.runner }}
     runs-on: ${{ matrix.runner }}
     container: ${{ matrix.container }}
     timeout-minutes: ${{ fromJson(github.event.inputs.timeout) }}
