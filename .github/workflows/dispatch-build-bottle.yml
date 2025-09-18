@@ -59,6 +59,15 @@ jobs:
     outputs:
       runners: ${{ steps.runner-matrix.outputs.result }}
     steps:
+      - name: Print details for dispatch job
+        run: |
+          echo sender="${DISPATCH_BUILD_BOTTLE_SENDER}"
+          echo formula="${DISPATCH_BUILD_BOTTLE_FORMULA}"
+          echo runner="${DISPATCH_BUILD_BOTTLE_RUNNER}"
+          echo timeout="${DISPATCH_BUILD_BOTTLE_TIMEOUT}"
+          echo issue="${DISPATCH_BUILD_BOTTLE_ISSUE}"
+          echo upload="${DISPATCH_BUILD_BOTTLE_UPLOAD}"
+
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@main
@@ -108,7 +117,9 @@ jobs:
           formula = Formulary.factory(formula_name)
           exit_code = 0
 
-          bottled_tags = matrix.filter_map do |runner|
+          bottled_tags = matrix.filter_map do |entry|
+            runner = entry.fetch("runner")
+
             bottle_tag = if runner.start_with?("ubuntu-") && runner.end_with?("-arm")
               Utils::Bottles.tag(:arm64_linux)
             elsif runner.start_with?("ubuntu-")
@@ -157,15 +168,6 @@ jobs:
       HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
       BOTTLES_DIR: ${{ matrix.workdir || github.workspace }}/bottles
     steps:
-      - name: Print details for dispatch job
-        run: |
-          echo sender="${DISPATCH_BUILD_BOTTLE_SENDER}"
-          echo formula="${DISPATCH_BUILD_BOTTLE_FORMULA}"
-          echo runner="${DISPATCH_BUILD_BOTTLE_RUNNER}"
-          echo timeout="${DISPATCH_BUILD_BOTTLE_TIMEOUT}"
-          echo issue="${DISPATCH_BUILD_BOTTLE_ISSUE}"
-          echo upload="${DISPATCH_BUILD_BOTTLE_UPLOAD}"
-
       - name: Pre-test steps
         uses: Homebrew/actions/pre-build@main
         with:
