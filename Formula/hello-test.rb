@@ -8,6 +8,7 @@ class HelloTest < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test"
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "3c0a86c9f4355683a7487c27187b1eb6a10dd0db1cb42fb8b9d7a1d98344663b"
     sha256 cellar: :any_skip_relocation, arm64_sequoia: "e3f62d9bc2e3b053ee7a368e01ab1db92322439f958b46f1ef8d020d7f206376"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:  "ac826d9f842defb260c1a0a1a01b5cab3947e262a753ef648412066914739966"
     sha256 cellar: :any_skip_relocation, ventura:       "1ada8fec7ae8cdc8f1787079568c0f36f88ed4d09c49fc5ed0542a0c8cf28164"
