@@ -68,10 +68,10 @@ jobs:
         run: |
           echo sender="${DISPATCH_REBOTTLE_SENDER}"
           echo formula="${DISPATCH_REBOTTLE_FORMULA}"
-          echo runner="${DISPATCH_REBOTTLE_RUNNER}"
           echo timeout="${DISPATCH_REBOTTLE_TIMEOUT}"
           echo issue="${DISPATCH_REBOTTLE_ISSUE}"
           echo upload="${DISPATCH_REBOTTLE_UPLOAD}"
+          echo reason="${DISPATCH_REBOTTLE_REASON}"
 
       - name: Set up Homebrew
         id: set-up-homebrew
