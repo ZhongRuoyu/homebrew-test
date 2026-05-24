@@ -8,13 +8,14 @@ class HelloTest < Formula
 
   bottle do
     root_url "https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test"
-    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d06f83275de746dbb2145305c261c99d290cf90585fa8565a8c5f3a5e39b2546"
-    sha256 cellar: :any_skip_relocation, arm64_sequoia: "8ca9c92cf12e5ae96e228a4c62b19198add05b46ff002274f3f9e2c0c3b3fb66"
-    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c82e1e9f70ffdd400a58eb138b9b59eb70882c1faf58e2f182f3f48167a5420c"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe:   "03333f44b8e6bd007d02c292eaacd4648dd16c798d9a1f0c426021d3d33ec716"
+    sha256 cellar: :any_skip_relocation, arm64_sequoia: "9f1348dfacaf66471f72aae721636c2c7eed802edc5c06f56ea0651005b31bf1"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma:  "35f39af30aed5bf9a930cb4841d8fac43c5ffb990d291ab3e55ddd37c43f5b72"
     sha256 cellar: :any_skip_relocation, tahoe:         "c9af7ee76ac45f786743f07efe396c585921f2fca1bdea76f5fe74bb44972e63"
-    sha256 cellar: :any_skip_relocation, sequoia:       "e401c27b2aefb83e48c874b7b1e83cb44eff9b4132625e33ff4d3a74877198f2"
-    sha256                               arm64_linux:   "5f4a61cd265006f77709a7646ac18986a68f140c3ad55a46f62496d18be917fa"
-    sha256                               x86_64_linux:  "ec7428e7615c117981e5d31f1eea9ec287cf6a6a05bc15a05cd04a3e7640459c"
+    sha256 cellar: :any_skip_relocation, sequoia:       "8727ee70ba0f035e56b94e0bbe8ad9b585574c3363fd29ba3134ad430d7bf730"
+    sha256                               arm64_linux:   "52adc090cfc512f842e62d49e004d1406cc440c6e233ea8aa51b3494a584f2cd"
+    sha256                               x86_64_linux:  "a5de9e6a5ac91d94c90dcf897f158dd7c719def418165faa6d4259ab1c5419cb"
   end
 
   def install
