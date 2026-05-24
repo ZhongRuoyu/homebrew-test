@@ -11,6 +11,7 @@ class HelloTest < Formula
     sha256 cellar: :any_skip_relocation, arm64_tahoe:   "d06f83275de746dbb2145305c261c99d290cf90585fa8565a8c5f3a5e39b2546"
     sha256 cellar: :any_skip_relocation, arm64_sequoia: "8ca9c92cf12e5ae96e228a4c62b19198add05b46ff002274f3f9e2c0c3b3fb66"
     sha256 cellar: :any_skip_relocation, arm64_sonoma:  "c82e1e9f70ffdd400a58eb138b9b59eb70882c1faf58e2f182f3f48167a5420c"
+    sha256 cellar: :any_skip_relocation, tahoe:         "c9af7ee76ac45f786743f07efe396c585921f2fca1bdea76f5fe74bb44972e63"
     sha256 cellar: :any_skip_relocation, sequoia:       "e401c27b2aefb83e48c874b7b1e83cb44eff9b4132625e33ff4d3a74877198f2"
     sha256                               arm64_linux:   "5f4a61cd265006f77709a7646ac18986a68f140c3ad55a46f62496d18be917fa"
     sha256                               x86_64_linux:  "ec7428e7615c117981e5d31f1eea9ec287cf6a6a05bc15a05cd04a3e7640459c"
