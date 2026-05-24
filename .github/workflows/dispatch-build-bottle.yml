@@ -316,11 +316,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ steps.create-pr.outputs.number }}
         run: |
-          # Hold the `concurrency` lock for up to another 10 minutes while the PR has not yet been merged.
-          sleep 300
+          # Hold the `concurrency` lock for up to another 5 minutes while the PR has not yet been merged.
+          sleep 150
 
           attempt=0
-          max_attempts=5
+          max_attempts=4
           sleep_time=10
 
           while (( attempt < max_attempts ))
