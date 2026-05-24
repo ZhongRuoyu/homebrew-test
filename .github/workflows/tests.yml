@@ -6,30 +6,37 @@ on:
       - main
   pull_request:
 
-env:
-  HOMEBREW_ARM64_TESTING: 1
-
 concurrency:
   group: tests-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+permissions: {}
+
+defaults:
+  run:
+    shell: bash -xeuo pipefail {0}
+
+env:
+  GH_REPO: ${{ github.repository }}
+  PR: ${{ github.event.pull_request.number }}
+
 jobs:
   tap-syntax:
     name: Tap syntax
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     container:
-      image: ghcr.io/homebrew/ubuntu22.04:main
+      image: ghcr.io/homebrew/brew:main
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@main
+        uses: Homebrew/actions/setup-homebrew@main # zizmor: ignore[unpinned-uses]
         with:
           core: true
           cask: false
           stable: true
 
       - name: Cache style cache
-        uses: actions/cache@v4
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: /home/linuxbrew/.cache/Homebrew/style
           key: style-cache-${{ github.sha }}
@@ -37,15 +44,44 @@ jobs:
 
       - run: brew test-bot --only-tap-syntax
 
-  tests:
-    needs: tap-syntax
+  setup-tests:
     if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      syntax-only: ${{ steps.check-labels.outputs.syntax-only }}
+    steps:
+      - name: Check for CI labels
+        id: check-labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          labels="$(gh pr view "$PR" --json=labels --jq='.labels[].name')"
+          if grep -Fqx 'CI-syntax-only' <<< "$labels"; then
+            syntax_only=true
+          elif grep -Fqx 'CI-published-bottle-commits' <<< "$labels"; then
+            syntax_only=true
+          else
+            syntax_only=false
+          fi
+          {
+            echo "syntax-only=$syntax_only"
+          } >> "$GITHUB_OUTPUT"
+
+  tests:
+    needs: [tap-syntax, setup-tests]
+    if: >
+      github.event_name == 'pull_request' &&
+      !fromJson(needs.setup-tests.outputs.syntax-only)
     strategy:
       fail-fast: false
       matrix:
         include:
           - name: macOS 26 (arm64)
             runs-on: macos-26
+          - name: macOS 26 (x86_64)
+            runs-on: macos-26-intel
           - name: macOS 15 (arm64)
             runs-on: macos-15
           - name: macOS 15 (x86_64)
@@ -81,7 +117,7 @@ jobs:
       BOTTLES_DIR: ${{ matrix.working-directory || github.workspace }}/bottles
     steps:
       - name: Pre-test steps
-        uses: Homebrew/actions/pre-build@main
+        uses: Homebrew/actions/pre-build@main # zizmor: ignore[unpinned-uses]
         with:
           bottles-directory: ${{ env.BOTTLES_DIR }}
           cleanup: ${{ runner.os == 'macOS' }}
@@ -91,7 +127,7 @@ jobs:
           HOMEBREW_DOCKER_REGISTRY_TOKEN=$(echo -n "${TOKEN}" | base64 | tr -d '\n')
           echo "::add-mask::${HOMEBREW_DOCKER_REGISTRY_TOKEN}"
           export HOMEBREW_DOCKER_REGISTRY_TOKEN
-          brew test-bot --only-formulae --root-url='https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test'
+          brew test-bot --only-formulae --root-url="https://ghcr.io/v2/zhongruoyu/zhongruoyu-homebrew-test"
         id: brew-test-bot-formulae
         if: github.event_name == 'pull_request'
         env:
@@ -100,9 +136,56 @@ jobs:
 
       - name: Post-build steps
         if: always() && github.event_name == 'pull_request'
-        uses: Homebrew/actions/post-build@main
+        uses: Homebrew/actions/post-build@main # zizmor: ignore[unpinned-uses]
         with:
           bottles-directory: ${{ env.BOTTLES_DIR }}
           logs-directory: ${{ format('{0}/logs', env.BOTTLES_DIR) }}
           runner: ${{ matrix.runs-on }}
           cleanup: false
+
+  conclusion:
+    needs: [tap-syntax, setup-tests, tests]
+    if: always() && github.event_name == 'pull_request'
+    runs-on: ubuntu-slim
+    steps:
+      - name: Check `tests` result
+        env:
+          TESTS_RESULT: ${{ needs.tests.result }}
+          SYNTAX_ONLY: ${{ needs.setup-tests.outputs.syntax-only }}
+        run: |
+          result="${TESTS_RESULT}"
+          # Silence lint error about backtick usage inside single quotes.
+          # shellcheck disable=SC2016
+          printf '::notice ::`tests` job status: %s\n' "$result"
+
+          # Possible values are `success`, `failure`, `cancelled` or `skipped`.
+          # https://docs.github.com/en/actions/learn-github-actions/contexts#needs-context
+          if [[ "$result" = "failure" ]] || [[ "$result" = "cancelled" ]]
+          then
+            # Silence lint error about backtick usage inside single quotes.
+            # shellcheck disable=SC2016
+            printf '::error ::`tests` job %s.\n' "$result"
+            exit 1
+          fi
+
+          syntax_only="${SYNTAX_ONLY-}"
+
+          # The tests job can be skipped only if the PR is syntax-only.
+          if [[ "$result" = "skipped" ]] && [[ "$syntax_only" = "true" ]]
+          then
+            exit 0
+          fi
+
+          # The test job can succeed only if the PR is not syntax-only.
+          # Otherwise it must have been skipped.
+          if [[ "$result" = "success" ]] && [[ "$syntax_only" = "false" ]]
+          then
+            exit 0
+          fi
+
+          # If we made it here, something went wrong with our workflow run that needs investigating.
+          printf '::error ::Unexpected outcome!\n'
+          # Silence lint error about backtick usage inside single quotes.
+          # shellcheck disable=SC2016
+          printf '::error ::`tests` job result: %s\n' "$result" # success/skipped
+          exit 1
