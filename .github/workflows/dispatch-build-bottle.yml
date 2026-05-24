@@ -243,7 +243,7 @@ jobs:
       - name: Configure Git user
         uses: Homebrew/actions/git-user-config@main # zizmor: ignore[unpinned-uses]
         with:
-          username: ${{ github.actor }}
+          username: zhongruoyu-commit-app[bot]
 
       - name: Generate build provenance
         uses: actions/attest@59d89421af93a897026c735860bf21b6eb4f7b26 # v4.1.0
