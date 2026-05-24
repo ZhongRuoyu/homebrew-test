@@ -294,6 +294,7 @@ jobs:
           head: ${{ env.BOTTLE_BRANCH }}
           title: ${{ steps.upload.outputs.title }}
           body: Created by [`brew dispatch-build-bottle`](${{ env.RUN_URL }})
+          labels: CI-published-bottle-commits
           reviewers: ${{ github.actor }}
 
       - name: Enable automerge
