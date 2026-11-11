@@ -26,8 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/homebrew/brew:main # zizmor: ignore[unpinned-images]
-    permissions:
-      contents: read
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
@@ -36,7 +34,6 @@ jobs:
           core: true
           cask: false
           stable: true
-          token: ${{ github.token }}
 
       - name: Cache style cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0

@@ -48,8 +48,6 @@ jobs:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@c262868c096d909fc278daa87ed9772967331ea3 # 2026.11.02.1
-        with:
-          token: ${{ github.token }}
 
       - name: Configure Git user
         uses: Homebrew/actions/git-user-config@c262868c096d909fc278daa87ed9772967331ea3 # 2026.11.02.1
