@@ -1,51 +1,56 @@
 name: brew pr-pull
 
 on:
-  pull_request_target:
-    # zizmor: ignore[dangerous-triggers] We need write permissions here.
-    types:
-      - labeled
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: Pull request number
+        type: number
+        required: true
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ inputs.pull_request }}
   cancel-in-progress: false
 
 permissions: {}
 
 defaults:
   run:
-    shell: bash -xeuo pipefail {0}
+    shell: bash -euxo pipefail {0}
 
 env:
   GH_REPO: ${{ github.repository }}
-  PR: ${{ github.event.pull_request.number }}
+  PR: ${{ inputs.pull_request }}
 
 jobs:
   pr-pull:
-    if: contains(github.event.pull_request.labels.*.name, 'pr-pull')
+    name: brew pr-pull
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/homebrew/brew:main # zizmor: ignore[unpinned-images]
     permissions:
-      actions: read
-      artifact-metadata: write
-      attestations: write
-      checks: read
-      contents: write
-      id-token: write
-      issues: read
-      packages: write
-      pull-requests: write
+      actions: read # for `brew pr-pull`
+      artifact-metadata: write # for generating build provenance
+      attestations: write # for generating build provenance
+      checks: read # for `brew pr-pull`
+      contents: write # for pushing bottle commits
+      id-token: write # for generating build provenance
+      issues: read # for `brew pr-pull`
+      packages: write # for uploading bottles
+      pull-requests: write # for managing PR
+    environment:
+      name: github
+      deployment: false
     defaults:
       run:
         working-directory: /github/home
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@main # zizmor: ignore[unpinned-uses]
+        uses: Homebrew/actions/setup-homebrew@c262868c096d909fc278daa87ed9772967331ea3 # 2026.11.02.1
 
-      - name: Set up git
-        uses: Homebrew/actions/git-user-config@main # zizmor: ignore[unpinned-uses]
+      - name: Configure Git user
+        uses: Homebrew/actions/git-user-config@c262868c096d909fc278daa87ed9772967331ea3 # 2026.11.02.1
         with:
           username: zhongruoyu-commit-app[bot]
 
@@ -88,19 +93,11 @@ jobs:
           permission-pull-requests: write
 
       - name: Push commits
-        uses: Homebrew/actions/git-try-push@main # zizmor: ignore[unpinned-uses]
+        uses: Homebrew/actions/git-try-push@c262868c096d909fc278daa87ed9772967331ea3 # 2026.11.02.1
         with:
           token: ${{ steps.app-token.outputs.token }}
           directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
           branch: ${{ github.head_ref }}
-
-      - name: Remove pr-pull label on failure
-        if: failure()
-        working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh pr edit --remove-label="pr-pull" "$PR"
 
       - name: Add CI-published-bottle-commits label
         working-directory: ${{ steps.set-up-homebrew.outputs.repository-path }}
