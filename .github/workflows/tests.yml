@@ -112,7 +112,7 @@ jobs:
     container: ${{ matrix.container }}
     defaults:
       run:
-        shell: bash
+        shell: bash -euxo pipefail {0}
         working-directory: ${{ matrix.working-directory || github.workspace }}
     env:
       BOTTLES_DIR: ${{ matrix.working-directory || github.workspace }}/bottles

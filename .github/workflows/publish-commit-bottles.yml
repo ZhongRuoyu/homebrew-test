@@ -82,6 +82,7 @@ jobs:
       deployment: false
     defaults:
       run:
+        shell: bash -euxo pipefail {0}
         working-directory: /github/home
     steps:
       - name: Set up Homebrew
